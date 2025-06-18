@@ -11,56 +11,204 @@
                 <div class="card-body p-5">
                     <h2 class="text-center mb-4">Create Account</h2>
                     
-                    {% if messages %}
-                    <div class="messages">
-                        {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <div id="firebaseui-auth-container"></div>
+                    <div id="loader" class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
                         </div>
-                        {% endfor %}
                     </div>
-                    {% endif %}
-
-                    <form method="post" class="needs-validation" novalidate>
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email address</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                            <div class="invalid-feedback">
-                                Please provide a valid email address.
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required minlength="6">
-                            <div class="invalid-feedback">
-                                Password must be at least 6 characters long.
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 mb-3">Sign Up</button>
-                        <p class="text-center mb-0">Already have an account? <a href="{% url 'signin' %}">Sign In</a></p>
-                    </form>
+                    
+                    <div class="messages mt-3"></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Firebase UI CSS -->
+<link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth.css" />
+
+<!-- Firebase Scripts -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth.js"></script>
+
 <script>
-// Form validation
-(function () {
-    'use strict'
-    var forms = document.querySelectorAll('.needs-validation')
-    Array.prototype.slice.call(forms).forEach(function (form) {
-        form.addEventListener('submit', function (event) {
-            if (!form.checkValidity()) {
-                event.preventDefault()
-                event.stopPropagation()
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Firebase
+    const firebaseConfig = {{ firebase_config|safe }};
+    
+    try {
+        // Check if Firebase is not already initialized
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const auth = firebase.auth();
+        
+        // Initialize the FirebaseUI Widget using Firebase
+        const ui = new firebaseui.auth.AuthUI(auth);
+
+        const uiConfig = {
+            callbacks: {
+                signInSuccessWithAuthResult: function(authResult) {
+                    showMessage('Signing in...', 'info');
+                    // Get the user's ID token
+                    return authResult.user.getIdToken().then(function(idToken) {
+                        // Send token to your backend via HTTPS
+                        return fetch('{% url "handle_firebase_auth" %}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify({ idToken: idToken })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                showMessage('Successfully signed in! Redirecting...', 'success');
+                                setTimeout(() => {
+                                    window.location.href = '{% url "home" %}';
+                                }, 1000);
+                                return false;
+                            } else {
+                                throw new Error(data.error || 'Authentication failed');
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showError(error.message);
+                        return false;
+                    });
+                },
+                signInFailure: function(error) {
+                    // Handle errors
+                    console.error('Sign-in error:', error);
+                    showError(error.message || 'Sign-in failed. Please try again.');
+                    return false;
+                },
+                uiShown: function() {
+                    document.getElementById('loader').style.display = 'none';
+                }
+            },
+            signInOptions: [
+                {
+                    provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+                    customParameters: {
+                        prompt: 'select_account'
+                    }
+                },
+                {
+                    provider: firebase.auth.GithubAuthProvider.PROVIDER_ID,
+                    customParameters: {
+                        prompt: 'consent'
+                    }
+                },
+                {
+                    provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+                    requireDisplayName: false
+                }
+            ],
+            signInFlow: 'popup',
+            tosUrl: '{% url "home" %}',
+            privacyPolicyUrl: '{% url "home" %}'
+        };
+
+        // Start the Firebase UI Auth
+        ui.start('#firebaseui-auth-container', uiConfig);
+    } catch (error) {
+        console.error('Firebase initialization error:', error);
+        showError('Failed to initialize authentication. Please try again later.');
+    }
+});
+
+// Show error message
+function showError(message) {
+    showMessage(message, 'danger');
+}
+
+// Show message with type
+function showMessage(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    const messagesDiv = document.querySelector('.messages');
+    messagesDiv.innerHTML = ''; // Clear previous messages
+    messagesDiv.appendChild(alertDiv);
+}
+
+// Get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
             }
-            form.classList.add('was-validated')
-        }, false)
-    })
-})()
+        }
+    }
+    return cookieValue;
+}
 </script>
+
+<style>
+#firebaseui-auth-container {
+    margin-top: 20px;
+    min-height: 300px;
+}
+
+.firebaseui-container {
+    max-width: 100% !important;
+    font-family: inherit !important;
+}
+
+.firebaseui-card-content {
+    padding: 0 !important;
+}
+
+#loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.mdl-button--raised.mdl-button--colored {
+    background: #0d6efd !important;
+}
+
+.mdl-button--primary.mdl-button--primary {
+    color: #0d6efd !important;
+}
+
+.firebaseui-title {
+    color: #333 !important;
+    font-family: inherit !important;
+}
+
+.firebaseui-text {
+    color: #666 !important;
+    font-family: inherit !important;
+}
+
+.firebaseui-error {
+    color: #dc3545 !important;
+}
+
+.messages {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    max-width: 350px;
+}
+</style>
 {% endblock %}

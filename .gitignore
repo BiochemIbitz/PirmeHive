@@ -40,6 +40,14 @@ ENV/
 # Environment variables
 .env
 .env.local
+.env.development
+.env.production
+
+# Firebase credentials
+*-firebase-adminsdk-*.json
+
+# Documentation
+Organizational Structure Document.docx
 
 # Static files
 staticfiles/

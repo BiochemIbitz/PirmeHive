@@ -1,58 +1,132 @@
 {% extends 'base.html' %}
-
-{% block title %}Contact Us - PrimeHive{% endblock %}
+{% load static %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="form-container">
-                <h2 class="text-center mb-4">Contact Us</h2>
-                <form method="post" class="needs-validation" novalidate>
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Full Name</label>
-                        <input type="text" class="form-control" id="name" name="name" required>
-                        <div class="invalid-feedback">
-                            Please provide your name.
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email Address</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
-                        <div class="invalid-feedback">
-                            Please provide a valid email address.
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="phone" class="form-label">Phone Number</label>
-                        <input type="tel" class="form-control" id="phone" name="phone">
-                    </div>
-                    <div class="mb-3">
-                        <label for="service" class="form-label">Service of Interest</label>
-                        <select class="form-select" id="service" name="service" required>
-                            <option value="">Select a service...</option>
-                            {% for service in services %}
-                            <option value="{{ service.id }}">{{ service.name }}</option>
-                            {% endfor %}
-                        </select>
-                        <div class="invalid-feedback">
-                            Please select a service.
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="message" class="form-label">Message</label>
-                        <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
-                        <div class="invalid-feedback">
-                            Please provide your message.
-                        </div>
-                    </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
-                    </div>
-                </form>
+<!-- Contact Header -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 mb-3">Contact Us</h1>
+                <p class="lead mb-0">Get in touch with our expert teams to discuss your next project or learn more about our services.</p>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<!-- Contact Information -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Contact Form -->
+            <div class="col-lg-7 mb-4 mb-lg-0">
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <h3 class="mb-4">Send Us a Message</h3>
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="name" class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="department" class="form-label">Department</label>
+                                <select class="form-select" id="department" name="department" required>
+                                    <option value="">Select Department</option>
+                                    <optgroup label="Technical Division">
+                                        <option value="software">Software Development</option>
+                                        <option value="ai-robotics">AI & Robotics</option>
+                                        <option value="web-design">Web & Digital Design</option>
+                                    </optgroup>
+                                    <optgroup label="Operations Division">
+                                        <option value="project">Project Management</option>
+                                        <option value="client-services">Client Services</option>
+                                        <option value="qa">Quality Assurance</option>
+                                    </optgroup>
+                                    <optgroup label="Support Division">
+                                        <option value="hr">Human Resources</option>
+                                        <option value="finance">Finance</option>
+                                        <option value="marketing">Marketing & Communications</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="subject" class="form-label">Subject</label>
+                                <input type="text" class="form-control" id="subject" name="subject" required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="message" class="form-label">Message</label>
+                                <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="col-lg-5">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h3 class="mb-4">Our Divisions</h3>
+                        <div class="mb-4">
+                            <h5 class="text-primary">Technical Division</h5>
+                            <p class="mb-2"><i class="fas fa-envelope me-2"></i>technical@primehive.com</p>
+                            <p class="mb-0"><i class="fas fa-phone me-2"></i>+1 (555) 123-4567</p>
+                        </div>
+                        <div class="mb-4">
+                            <h5 class="text-primary">Operations Division</h5>
+                            <p class="mb-2"><i class="fas fa-envelope me-2"></i>operations@primehive.com</p>
+                            <p class="mb-0"><i class="fas fa-phone me-2"></i>+1 (555) 234-5678</p>
+                        </div>
+                        <div class="mb-4">
+                            <h5 class="text-primary">Support Division</h5>
+                            <p class="mb-2"><i class="fas fa-envelope me-2"></i>support@primehive.com</p>
+                            <p class="mb-0"><i class="fas fa-phone me-2"></i>+1 (555) 345-6789</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <h3 class="mb-4">Visit Us</h3>
+                        <p class="mb-4">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            Silicon Valley, California<br>
+                            United States
+                        </p>
+                        <h5 class="text-primary mb-3">Business Hours</h5>
+                        <p class="mb-2">Monday - Friday: 9:00 AM - 6:00 PM (PST)</p>
+                        <p class="mb-0">Saturday - Sunday: Closed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Map Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="ratio ratio-21x9">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d202844.75269274872!2d-122.11018779651699!3d37.40297571092009!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x808fb68ad0cfc739%3A0x7eb356b66bd4b50e!2sSilicon%20Valley%2C%20CA!5e0!3m2!1sen!2sus!4v1696285058605!5m2!1sen!2sus" 
+                        style="border:0;" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}

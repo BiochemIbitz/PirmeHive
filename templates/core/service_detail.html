@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ service.title }} - PrimeHive{% endblock %}
+
+{% block content %}
+<div class="service-detail">
+    <div class="container">
+        <!-- Service Header -->
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <i class="{{ service.icon }} fa-4x mb-4 text-primary"></i>
+                <h1 class="display-4 mb-3">{{ service.title }}</h1>
+                <p class="lead text-muted">{{ service.description }}</p>
+            </div>
+        </div>
+
+        <!-- Service Details -->
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h3 class="mb-4">What We Offer</h3>
+                        <div class="features-list">
+                            {% for feature in service.features %}
+                            <div class="feature-item mb-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <h5 class="mb-0">{{ feature.title }}</h5>
+                                </div>
+                                <p class="text-muted ms-4">{{ feature.description }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing and Booking -->
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h3 class="mb-4">Pricing Plans</h3>
+                        <div class="row">
+                            {% for plan in service.pricing_plans %}
+                            <div class="col-md-4 mb-4">
+                                <div class="pricing-card text-center p-4 h-100 {% if plan.recommended %}border border-primary{% endif %}">
+                                    <h4 class="mb-3">{{ plan.name }}</h4>
+                                    <div class="price mb-3">
+                                        <span class="currency">$</span>
+                                        <span class="amount">{{ plan.price }}</span>
+                                        <span class="period">/{{ plan.period }}</span>
+                                    </div>
+                                    <ul class="list-unstyled mb-4">
+                                        {% for feature in plan.features %}
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            {{ feature }}
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                    <button class="btn btn-primary book-service-btn" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#bookingModal"
+                                            data-service="{{ service.title }}"
+                                            data-plan="{{ plan.name }}">
+                                        Book Now
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Process Section -->
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h3 class="mb-4">Our Process</h3>
+                        <div class="timeline">
+                            {% for step in service.process_steps %}
+                            <div class="timeline-item mb-4">
+                                <div class="d-flex">
+                                    <div class="timeline-marker me-3">
+                                        <div class="marker-circle">{{ forloop.counter }}</div>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h5>{{ step.title }}</h5>
+                                        <p class="text-muted">{{ step.description }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Booking Modal -->
+<div class="modal fade" id="bookingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Book Service</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{% url 'book_service' service.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" name="service_id" value="{{ service.id }}">
+                    <input type="hidden" name="plan_name" id="planName">
+                    
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Project Details</label>
+                        <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="preferred_date" class="form-label">Preferred Start Date</label>
+                        <input type="date" class="form-control" id="preferred_date" name="preferred_date" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit Booking</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.service-detail {
+    padding: 4rem 0;
+}
+
+.pricing-card {
+    background: #fff;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.pricing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.pricing-card .price {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.pricing-card .currency {
+    font-size: 1.5rem;
+    font-weight: 500;
+    vertical-align: super;
+}
+
+.pricing-card .period {
+    font-size: 1rem;
+    color: #666;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 1rem;
+}
+
+.timeline-marker {
+    min-width: 40px;
+}
+
+.marker-circle {
+    width: 40px;
+    height: 40px;
+    background: #007bff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+}
+
+.feature-item {
+    transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+    transform: translateX(5px);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update modal with plan details
+    const bookingModal = document.getElementById('bookingModal');
+    if (bookingModal) {
+        bookingModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const planName = button.getAttribute('data-plan');
+            document.getElementById('planName').value = planName;
+        });
+    }
+
+    // Form validation
+    const bookingForm = bookingModal.querySelector('form');
+    bookingForm.addEventListener('submit', function(event) {
+        if (!bookingForm.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        bookingForm.classList.add('was-validated');
+    });
+});
+</script>
+{% endblock %}
