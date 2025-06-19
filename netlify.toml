@@ -14,10 +14,20 @@
 [context.branch-deploy]
   environment = { DJANGO_SETTINGS_MODULE = "primehive.settings" }
 
-# Redirects and headers
+# Redirects for Django application
+[[redirects]]
+  from = "/static/*"
+  to = "/static/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/media/*"
+  to = "/media/:splat"
+  status = 200
+
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/.netlify/functions/django"
   status = 200
 
 [[headers]]
