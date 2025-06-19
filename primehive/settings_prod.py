@@ -16,7 +16,10 @@ DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 # Allowed hosts
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+# Include Netlify domains and any domains from environment variables
+netlify_domains = ['netlify.app', '.netlify.app']
+env_hosts = os.getenv('ALLOWED_HOSTS', '').split(',')
+ALLOWED_HOSTS = env_hosts + netlify_domains if env_hosts != [''] else netlify_domains
 
 # Database settings
 DATABASES = {
